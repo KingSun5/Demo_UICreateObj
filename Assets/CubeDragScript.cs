@@ -3,58 +3,48 @@ using System.Collections;
 
 public class CubeDragScript : MonoBehaviour {
 
-    public GameObject camera;
 	// Use this for initialization
 	void Start () {
        
-        camera = GameObject.Find("Main Camera");
         StartCoroutine(OnMouseDown());
     }
 	
-	// Update is called once per frame
-	void Update () {
-      
-
-    }
-    
 
     IEnumerator OnMouseDown()
-
     {
-
-        //将物体由世界坐标系转换为屏幕坐标系
-
-        Vector3 screenSpace = Camera.main.WorldToScreenPoint(transform.position);//三维物体坐标转屏幕坐标
-
-        //完成两个步骤 1.由于鼠标的坐标系是2维，需要转换成3维的世界坐标系  
-
-        //    //             2.只有3维坐标情况下才能来计算鼠标位置与物理的距离，offset即是距离
-
-        //将鼠标屏幕坐标转为三维坐标，再算出物体位置与鼠标之间的距离
-
-        Vector3 offset = transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenSpace.z));
-        
-        while (Input.GetMouseButton(0))
-
+        if (Camera.main != null)
         {
+            //三维物体世界坐标转屏幕坐标  
+            Vector3 screenSpace = Camera.main.WorldToScreenPoint(transform.position);
+
+            //完成两个步骤 1.由于鼠标的坐标系是2维，需要转换成3维的世界坐标系  
+
+            //            2.只有3维坐标情况下才能来计算鼠标位置与物理的距离，offset即是差值
+
+            //将鼠标屏幕坐标转为世界三维坐标，转换前的屏幕Z值套用Cube转换过得Z值，再算出Cube世界坐标与鼠标世界坐标的差值
+
+            Vector3 offset = transform.position - Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenSpace.z));
+        
+            while (Input.GetMouseButton(0))
+
+            {
            
-            camera.GetComponent<MouseOrbit>().enabled = false;
-            //得到现在鼠标的2维坐标系位置
+                Camera.main.GetComponent<MouseOrbit>().enabled = false;
+                
+                //得到现在鼠标的屏幕坐标
+                Vector3 curScreenSpace = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenSpace.z);
 
-            Vector3 curScreenSpace = new Vector3(Input.mousePosition.x, Input.mousePosition.y, screenSpace.z);
+                //物体的位置就是鼠标的世界坐标 + 差值
+                Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenSpace) + offset;
 
-            //将当前鼠标的2维位置转换成3维位置，再加上鼠标的移动量
+                transform.position = curPosition;
+                //这个很重要，循环执行
+                yield return null; 
 
-            Vector3 curPosition = Camera.main.ScreenToWorldPoint(curScreenSpace) + offset;
-
-            //curPosition就是物体应该的移动向量赋给transform的position属性
-
-            transform.position = curPosition;
-
-            yield return null; //这个很重要，循环执行
-
+            }
         }
-        camera.GetComponent<MouseOrbit>().enabled = true;
+
+        if (Camera.main != null) Camera.main.GetComponent<MouseOrbit>().enabled = true;
     }
 
 
