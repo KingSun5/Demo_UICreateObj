@@ -27,5 +27,4 @@ public class ClickButton : MonoBehaviour {
 		    cubePre.transform.position= Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, targetSpace.z));
 	    }
     }
-    
 }
